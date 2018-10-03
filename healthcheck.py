@@ -20,16 +20,16 @@ platform = 'cisco_xe'
 
 
 def send_mail():
-	fromaddr = "jfshaism@gmail.com"
-	toaddr = "javed.s.m@hotmail.com"
+	fromaddr = "@gmail.com"
+	toaddr = "@hotmail.com"
 	msg = MIMEMultipart()
-	msg['From'] = 'jfshaism@gmail.com'
-	msg['To'] = 'javed.s.m@hotmail.com'
+	msg['From'] = '@gmail.com'
+	msg['To'] = '@hotmail.com'
 	msg['Subject'] = "This is Health check"
 	msg.attach(MIMEText(status, 'plain'))	
 	server = smtplib.SMTP('smtp.gmail.com', 587)
 	server.starttls()
-	server.login(fromaddr, "allah@kind")
+	server.login(fromaddr, "")
 	text = msg.as_string()
 	server.sendmail(fromaddr, toaddr, text)
 	server.quit()
