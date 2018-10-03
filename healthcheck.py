@@ -42,7 +42,8 @@ for host in hosts:
 	host_name = connect.send_command('show run | in hostname',expect_string=r'#')
 	interface_status = connect.send_command(f'show ip int brief',expect_string=r'#')
 	old_stdout = sys.stdout
-	sys.stdout = StringIO
+	interface_result = StringIO()
+	sys.stdout = interface_result
 	sys.stdout = old_stdout
 	data = pd.read_fwf(StringIO(interface_status),  widths=[23, 16, 3, 7, 22, 8])
 	status = " "
@@ -50,5 +51,18 @@ for host in hosts:
 		if row[4] == 'administratively down' or row[4] == 'down':
 			log = (f"\nInterface {row[0]} is down in {host_name}\n")
 			status += log
+	
+
+	bgp_status = connect.send_command('show ip bgp summary | be N',expect_string=r'#')
+	old_stdout = sys.stdout
+	bgp_result = StringIO()
+	sys.stdout = bgp_result
+	sys.stdout = old_stdout
+	bgp_data = pd.read_fwf(StringIO(bgp_status),  delim_whitespace=True, header=None)
+	for index, row in bgp_data.iterrows():
+		if row[9] == 'Down' or row[9] == 'Idle' or row[9] == 'Active':
+			bgp = (f"\nNeighbor {row[0]} is down in {host_name}\n")
+			status += bgp
+	print(status)
 	send_mail()
 	
