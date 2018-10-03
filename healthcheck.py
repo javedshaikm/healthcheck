@@ -9,27 +9,30 @@ import paramiko
 import re
 from io import StringIO
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 
 username = 'cisco'
 password = 'cisco_1234!'
-#int_down = r"is administratively down"
-#result_file = open(r'D:\\python\\python-cisco-status.txt','r+')
 hosts = ['10.10.20.48']
 platform = 'cisco_xe'
 
 
 def send_mail():
-	sender = '@gmail.com'
-	receivers = ['@hotmail.com']
-	try:
-		server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-		server.login("@gmail.com", "")
-		server.sendmail(sender, receivers, message)         
-		print ('Successfully sent email')
-	except SMTPException:
-		print ('Error: unable to send email')
-
+	fromaddr = "jfshaism@gmail.com"
+	toaddr = "javed.s.m@hotmail.com"
+	msg = MIMEMultipart()
+	msg['From'] = 'jfshaism@gmail.com'
+	msg['To'] = 'javed.s.m@hotmail.com'
+	msg['Subject'] = "This is Health check"
+	msg.attach(MIMEText(status, 'plain'))	
+	server = smtplib.SMTP('smtp.gmail.com', 587)
+	server.starttls()
+	server.login(fromaddr, "allah@kind")
+	text = msg.as_string()
+	server.sendmail(fromaddr, toaddr, text)
+	server.quit()
 
 
 for host in hosts:
@@ -40,17 +43,12 @@ for host in hosts:
 	interface_status = connect.send_command(f'show ip int brief',expect_string=r'#')
 	old_stdout = sys.stdout
 	sys.stdout = StringIO
-	#print(interface_status)
 	sys.stdout = old_stdout
-	#data = pd.read_fwf('D:\\python\\python-cisco-status.txt',  widths=[23, 16, 3, 7, 22, 8])
 	data = pd.read_fwf(StringIO(interface_status),  widths=[23, 16, 3, 7, 22, 8])
-	#print(data)
-	message = " "
+	status = " "
 	for index, row in data.iterrows():
 		if row[4] == 'administratively down' or row[4] == 'down':
-			#print(f"Interface {row[0]} is down in {host_name}")
 			log = (f"\nInterface {row[0]} is down in {host_name}\n")
-			message += log
-	print(message)
+			status += log
 	send_mail()
-	#	print(row[0])
+	
