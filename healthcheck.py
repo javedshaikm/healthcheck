@@ -18,8 +18,17 @@ password = 'cisco_1234!'
 hosts = ['10.10.20.48']
 platform = 'cisco_xe'
 
-server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-server.login("email", "password")
+
+def send_mail():
+	sender = '@gmail.com'
+	receivers = ['@hotmail.com']
+	try:
+		server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+		server.login("@gmail.com", "")
+		server.sendmail(sender, receivers, message)         
+		print ('Successfully sent email')
+	except SMTPException:
+		print ('Error: unable to send email')
 
 
 
@@ -36,18 +45,12 @@ for host in hosts:
 	#data = pd.read_fwf('D:\\python\\python-cisco-status.txt',  widths=[23, 16, 3, 7, 22, 8])
 	data = pd.read_fwf(StringIO(interface_status),  widths=[23, 16, 3, 7, 22, 8])
 	#print(data)
+	message = " "
 	for index, row in data.iterrows():
 		if row[4] == 'administratively down' or row[4] == 'down':
 			#print(f"Interface {row[0]} is down in {host_name}")
-			
-			message = (f"Interface {row[0]} is down in {host_name}")
-			server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-			server.login("email", "password")
-			server.sendmail("@gmail.com", "@hotmail.com", message)
-			server.quit()
+			log = (f"\nInterface {row[0]} is down in {host_name}\n")
+			message += log
+	print(message)
+	send_mail()
 	#	print(row[0])
-			
-
-
-	
-	
