@@ -61,5 +61,11 @@ for host in hosts:
 			bgp = (f"\nNeighbor {row[0]} is down in {host_name}\n")
 			status += bgp
 send_mail()
-	
+
+
+for host in hosts:
+	for key, value in interfaces.items():
+		for items in value:
+			if host == key:
+				print(key, ":", items)	
 	
