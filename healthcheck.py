@@ -63,9 +63,31 @@ for host in hosts:
 send_mail()
 
 
-for host in hosts:
-	for key, value in interfaces.items():
-		for items in value:
-			if host == key:
-				print(key, ":", items)	
+interfaces = {'10.0.10.100':['Ethernet0/0','Ethernet1/0'],
+'10.0.10.101':['FastEthernet0/0','FastEthernet0/1']}
+platform = 'cisco_ios'
+
+
+status = " "
+
+for key, value in interfaces.items():
+    for items in value:
+        
+        connect = ConnectHandler(device_type=platform, ip=key, username=username, password=password)
+        output = connect.send_command('terminal length 0', expect_string=r'#')
+        output = connect.send_command('enable',expect_string=r'#')
+        host_name = connect.send_command('show run | in hostname',expect_string=r'#')                       
+        interface_status = connect.send_command(f'show ip int brief',expect_string=r'#')
+        old_stdout = sys.stdout
+        interface_result = StringIO()
+        sys.stdout = interface_result
+        sys.stdout = old_stdout
+
+        data = pd.read_fwf(StringIO(interface_status),  widths=[27, 16, 3, 7, 23, 8])
+    for index, row in data.iterrows():
+        
+        if (row[4] == 'administratively down' and row[0] == items) or (row[4] == 'down' and row[0] == items):
+            log = (f"\nInterface {row[0]} is down in {host_name}\n")
+            status += log
+send_mail()    
 	
